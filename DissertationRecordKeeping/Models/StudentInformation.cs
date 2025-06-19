@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿
+using System.ComponentModel.DataAnnotations;
 
 namespace DissertationRecordKeeping.Models
 {
@@ -18,7 +19,7 @@ namespace DissertationRecordKeeping.Models
         [Required, StringLength(50)]
         public string Email { get; set; }
         [Required, StringLength(50)]
-        public string MatriculationNumber { get; set; }
+        public int MatriculationNumber { get; set; }
         [Required, StringLength(50)]
         public string Supervisor { get; set; }
         [Required, StringLength(50)]
@@ -30,7 +31,6 @@ namespace DissertationRecordKeeping.Models
         [Required, StringLength(50)]
         public string Role { get; set; }
         [Required]
-       //  public string Password { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }

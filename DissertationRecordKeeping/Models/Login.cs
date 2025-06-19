@@ -5,7 +5,7 @@ namespace DissertationRecordKeeping.Models
     public class Login
     {
         [Required]
-        public string Username { get; set; }
+        public string UserName { get; set; }
         [Required]
         public string School { get; set; }
         [Required]

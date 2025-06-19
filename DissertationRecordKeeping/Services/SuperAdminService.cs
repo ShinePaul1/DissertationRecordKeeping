@@ -1,37 +1,37 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DissertationRecordKeeping.Data;
+using DissertationRecordKeeping.Models;
+using DissertationRecordKeeping.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using DissertationRecordKeeping.Data;
-using DissertationRecordKeeping.Models;
-using DissertationRecordKeeping.Services.Interfaces;
 
 namespace DissertationRecordKeeping.Services;
 
-public class AuthService : IAuthService
+public class SuperAdminService : ISuperAdminService
 {
     private readonly RecordContext _context;
     private readonly IConfiguration _configuration;
-    private readonly ILogger<AuthService> _logger;
+    private readonly ILogger<SuperAdminService> _logger;
 
-    public AuthService(
+    public SuperAdminService(
         RecordContext context,
         IConfiguration configuration,
-        ILogger<AuthService> logger)
+        ILogger<SuperAdminService> logger)
     {
         _context = context;
         _configuration = configuration;
         _logger = logger;
     }
 
-    public async Task<Admin> Register(Admin registerModel)
+    public async Task<Admin> RegisterAdmin(Admin registerModel)
     {
         try
         {
-            _logger.LogInformation("Registering Admin {Username}", registerModel.Username);
+            _logger.LogInformation("Registering Admin {Username and School}", registerModel.Username, registerModel.School, registerModel.Email);
 
             if (await _context.Admins.AnyAsync(u => u.Username == registerModel.Username))
                 throw new ValidationException("Username already exists");
@@ -55,36 +55,35 @@ public class AuthService : IAuthService
             _context.Admins.Add(admin);
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("User {Username} registered successfully", admin.Username);
+            _logger.LogInformation("Admin {Username and School} registered successfully", admin.Username, admin.School);
             return admin;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error registering user {Username}", registerModel.Username);
+            _logger.LogError(ex, "Error registering admin {Username and School}", registerModel.Username, registerModel.School);
             throw;
         }
     }
-
     public async Task<string> Login(Login loginModel)
     {
         try
         {
-            _logger.LogInformation("Login attempt for {Username}", loginModel.Username);
+            _logger.LogInformation("Login attempt for {Username and School}", loginModel.UserName, loginModel.School);
 
             var admin = await _context.Admins
-                .FirstOrDefaultAsync(u => u.Username == loginModel.Username);
+                .FirstOrDefaultAsync(u => u.Username == loginModel.UserName);
 
             if (admin == null || !VerifyPassword(loginModel.Password, admin.Password))
                 throw new UnauthorizedAccessException("Invalid credentials");
 
             var token = GenerateJwtToken(admin);
 
-            _logger.LogInformation("User {Username} logged in successfully", admin.Username);
+            _logger.LogInformation("User {Username and School} logged in successfully", admin.Username, admin.School);
             return token;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during login for {Username}", loginModel.Username);
+            _logger.LogError(ex, "Error during login for {Username and School}", loginModel.UserName, loginModel.School);
             throw;
         }
     }
@@ -165,11 +164,12 @@ public class AuthService : IAuthService
 
             existingAdmin.FirstName = admin.FirstName;
             existingAdmin.LastName = admin.LastName;
+            existingAdmin.Username = admin.School;
             existingAdmin.School = admin.School;
             existingAdmin.ContactNumber = admin.ContactNumber;
             existingAdmin.Email = admin.Email;
-            existingAdmin.Username = admin.Username;
             existingAdmin.Role = admin.Role;
+            existingAdmin.Password = admin.School;
 
             _context.Admins.Update(existingAdmin);
             await _context.SaveChangesAsync();
@@ -203,9 +203,19 @@ public class AuthService : IAuthService
         }
     }
 
-    Task<List<Admin>> IAuthService.GetAllAdmin()
+    public Task<List<Admin>> GetAllAdmin()
     {
         throw new NotImplementedException();
     }
-}
 
+    public Task LoginAsAdmin(object login)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task LoginAsAdmin(Login loginModel)
+    {
+        throw new NotImplementedException();
+    }
+
+}

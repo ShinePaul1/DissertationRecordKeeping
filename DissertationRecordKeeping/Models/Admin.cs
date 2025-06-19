@@ -21,7 +21,6 @@ namespace DissertationRecordKeeping.Models
         public string Role { get; set; }
         [Required]
         public string Password { get; set; }
-        // Assign role if possible
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }
