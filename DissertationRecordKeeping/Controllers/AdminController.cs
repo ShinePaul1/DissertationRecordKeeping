@@ -8,7 +8,7 @@ using DissertationRecordKeeping.Services;
 
 namespace DissertationRecordKeeping.Controllers;
 
-
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class AdminController : ControllerBase

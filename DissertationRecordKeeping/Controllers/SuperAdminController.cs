@@ -7,7 +7,7 @@ using DissertationRecordKeeping.Services;
 
 namespace DissertationRecordKeeping.Controllers;
 
-
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class SuperAdminController : ControllerBase
@@ -18,7 +18,7 @@ public class SuperAdminController : ControllerBase
     {
         _superAdminService = superAdminService;
     }
-   // [Authorize(Roles = "admin")]
+   [Authorize(Roles = "admin")]
     [HttpPost("registerAdmin")]
     public async Task<ActionResult<Admin>> RegisterAdmin([FromBody] Admin registerAdmin)
     {
@@ -36,7 +36,7 @@ public class SuperAdminController : ControllerBase
         var token = await _superAdminService.Login(loginModel);
         return Ok(new { Token = token, username = loginModel.UserName, school = loginModel.School, status = 2 });
     }
-    
+    [Authorize(Roles = "admin")]
     [HttpGet("getadmin/{id}")]
     public async Task<ActionResult<Admin>> GetAdmin(int id)
     {
@@ -55,7 +55,7 @@ public class SuperAdminController : ControllerBase
         return Ok(admins);
     }
 
-    //[Authorize(Roles = "superadmin")]
+    [Authorize(Roles = "admin")]
     [HttpPut("updateadmin/{id}")]
     public async Task<ActionResult<Admin>> UpdateAdmin(int id, [FromBody] Admin admin)
     {
@@ -69,7 +69,7 @@ public class SuperAdminController : ControllerBase
         return Ok(updatedAdmin);
     }
 
-    //[Authorize(Roles = "superadmin")]
+    [Authorize(Roles = "admin")]
     [HttpDelete("deleteadmin/{id}")]
     public async Task<IActionResult> DeleteAdmin(int id)
     {
