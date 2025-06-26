@@ -36,7 +36,7 @@ public class AdminService : IAdminService
             if (await _context.StudentInformations.AnyAsync(u => u.MatriculationNumber == addModel.MatriculationNumber))
                 throw new ValidationException("Matriculation Number already exists");
 
-            if (await _context.Admins.AnyAsync(u => u.Email == addModel.Email))
+            if (await _context.StudentInformations.AnyAsync(u => u.Email == addModel.Email))
                 throw new ValidationException("Email already exists");
 
 
@@ -53,38 +53,37 @@ public class AdminService : IAdminService
                 DocumentType = addModel.DocumentType,
                 DocumentTitle = addModel.DocumentTitle,
                 Level = addModel.Level,
-                Role = addModel.Role,
+               Role= addModel.Role,
                 CreatedAt = DateTime.Now
             };
 
             _context.StudentInformations.Add(student);
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("Student {MatriculationNumber} added successfully", student.MatriculationNumber);
+            _logger.LogInformation("Student {MatriculationNumber} added successfully", student.MatriculationNumber, student.School);
             return student;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error adding student record {MatriculationNumber}", addModel.MatriculationNumber);
+            _logger.LogError(ex, "Error adding student record {MatriculationNumber}", addModel.MatriculationNumber, addModel.School);
             throw;
         }
     }
-
-    public Task<bool> DeleteStudentInformation(int id)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<string> Login(Login loginModel)
+    /*
+    public async Task<string> Login(LoginModel loginModel)
     {
         try
         {
-            _logger.LogInformation("Login attempt for {Username}", loginModel.UserName, loginModel.School);
+            _logger.LogInformation("Login attempt for {Username}", loginModel.Password, loginModel.UserName, loginModel.School);
 
-            var admin = await _context.Admins
+            var admin = await _context.StudentInformations
                 .FirstOrDefaultAsync(u => u.School == loginModel.School);
 
             if (admin == null || !VerifyPassword(loginModel.Password, admin.Password))
+                throw new UnauthorizedAccessException("Invalid credentials");
+            if (admin == null || !VerifyPassword(loginModel.UserName, admin.Username))
+                throw new UnauthorizedAccessException("Invalid credentials");
+            if (admin == null || !VerifyPassword(loginModel.School, admin.School))
                 throw new UnauthorizedAccessException("Invalid credentials");
 
             var token = GenerateJwtToken(admin);
@@ -94,70 +93,59 @@ public class AdminService : IAdminService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during login for {Username}", loginModel.UserName, loginModel.School);
+            _logger.LogError(ex, "Error during login for {Username}", loginModel.Password, loginModel.UserName, loginModel.School);
             throw;
         }
     }
-
-    private string GenerateJwtToken(Admin admin)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<Admin> UpdateStudentInformation(int matriculationNumber, StudentInformation student)
-    {
-        throw new NotImplementedException();
-    }
-
-    Task<List<StudentInformation>> IAdminService.GetAllStudentInformation()
-    {
-        throw new NotImplementedException();
-    }
-
-    Task<StudentInformation> IAdminService.GetStudentInformation(int id)
-    {
-        throw new NotImplementedException();
-    }
-
+    
     private string HashPassword(string password)
     {
         using var sha256 = SHA256.Create();
         var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
         return Convert.ToBase64String(hashedBytes);
     }
-
-    Task<StudentInformation> IAdminService.UpdateStudentInformation(int matriculationNumber, StudentInformation student)
-    {
-        throw new NotImplementedException();
-    }
-
     private bool VerifyPassword(string password, string hash)
     {
         var computedHash = HashPassword(password);
         return computedHash == hash;
     }
-    /*
-    private string GenerateJwtToken(StudentInformation student)
-    {
-        var securityKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+private string GenerateJwtToken(StudentInformation student)
+{
+var securityKey = new SymmetricSecurityKey(
+Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-        var claims = new[]
-        {
-            new Claim(ClaimTypes.Name, student.School), // Username claim
-            new Claim(ClaimTypes.Role, student.Role)      // Role claim
-        };
+var claims = new[]
+{
+new Claim(ClaimTypes.Name, student.School), // Username claim
+new Claim(ClaimTypes.Role, student.Role)      // Role claim
+};
 
-        var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
-            claims: claims,
-            expires: DateTime.Now.AddHours(1),
-            signingCredentials: credentials);
+var token = new JwtSecurityToken(
+issuer: _configuration["Jwt:Issuer"],
+audience: _configuration["Jwt:Audience"],
+claims: claims,
+expires: DateTime.Now.AddHours(1),
+signingCredentials: credentials);
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
+return new JwtSecurityTokenHandler().WriteToken(token);
+}
     */
+    public Task<StudentInformation> UpdateStudentInformation(int matriculationNumber, StudentInformation student)
+    {
+        throw new NotImplementedException();
+    }
 
+    public Task<bool> DeleteStudentInformation(int matriculationNumber)
+    {
+        throw new NotImplementedException();
+    }
+    public Task<StudentInformation> GetStudentInformation(int matriculationNumber)
+    {
+        throw new NotImplementedException();
+    }
+    public Task<List<StudentInformation>> GetAllStudentInformations()
+    {
+        throw new NotImplementedException();
+    }
 }

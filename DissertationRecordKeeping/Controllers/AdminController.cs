@@ -4,13 +4,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Azure.Identity;
+using DissertationRecordKeeping.Services;
 
 namespace DissertationRecordKeeping.Controllers;
 
 
 [Route("api/[controller]")]
 [ApiController]
-//[Authorize]
 public class AdminController : ControllerBase
 {
     private readonly IAdminService _adminService;
@@ -19,32 +19,33 @@ public class AdminController : ControllerBase
     {
         _adminService = adminService;
     }
-   // [Authorize(Roles = "admin" )]
+    //[Authorize(Roles = "admin")]
     [HttpPost("addStudentInformation")]
-    public async Task<ActionResult<List<StudentInformation>>> AddStudentInformation(StudentInformation addModel)
+    public async Task<ActionResult<StudentInformation>> AddStudentInformation([FromBody] StudentInformation addStudentInformation)
     {
         if (!ModelState.IsValid)
-            return Ok(await _adminService.GetAllStudentInformation());
-
-        var student = await _adminService.AddStudentInformation(addModel);
-        return CreatedAtAction(nameof(Login), new { school = student.School }, student);
+            return Ok(ModelState);
+        var student = await _adminService.AddStudentInformation(addStudentInformation);
+        return CreatedAtAction(nameof(AddStudentInformation), new { matriculationNumber = student.MatriculationNumber, school = student.School }, student);
     }
 
+    /*
     //[Authorize(Roles = "admin")]
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] Login loginModel)
+    public async Task<IActionResult> LoginAsAdmin([FromBody] Login loginModel)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
         var token = await _adminService.Login(loginModel);
-        return Ok(new { Token = token, username = loginModel.UserName, status = 1 });
+        return Ok(new { Token = token, username = loginModel.UserName, school = loginModel.School, status = 2 });
     }
+    */
     //[Authorize(Roles = "admin")]
-    [HttpGet("getstudentInformation/{id}")]
-    public async Task<ActionResult<StudentInformation>> GetStudentInformation(int id)
+    [HttpGet("getstudentInformation/{matriculationNumber}")]
+    public async Task<ActionResult<StudentInformation>> GetStudentInformation(int matriculationNumber)
     {
-        var student = await _adminService.GetStudentInformation(id);
+        var student = await _adminService.GetStudentInformation(matriculationNumber);
         if (student == null)
             return NotFound();
 
@@ -52,9 +53,9 @@ public class AdminController : ControllerBase
     }
     [Authorize(Roles = "admin")]
     [HttpGet("getallstudentInformation")]
-    public async Task<ActionResult<List<StudentInformation>>> GetAllStudentInformation()
+    public async Task<ActionResult<List<StudentInformation>>> GetAllStudentInformations()
     {
-        var students = await _adminService.GetAllStudentInformation();
+        var students = await _adminService.GetAllStudentInformations();
         return Ok(students);
     }
     //[Authorize(Roles = "Admin")]

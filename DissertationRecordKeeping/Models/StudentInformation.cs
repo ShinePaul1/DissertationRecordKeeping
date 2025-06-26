@@ -6,7 +6,7 @@ namespace DissertationRecordKeeping.Models
     public class StudentInformation
     {
         public int Id { get; set; }
-        [Required, StringLength(50)]
+        [Required, StringLength(10)]
         public string FirstName { get; set; }
         [Required, StringLength(50)]
         public string LastName { get; set; }

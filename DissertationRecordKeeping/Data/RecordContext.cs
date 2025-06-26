@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DissertationRecordKeeping.Data
 {
-    public class RecordContext : IdentityDbContext
+    public class RecordContext : DbContext
     {
         public RecordContext(DbContextOptions<RecordContext> options) : base(options) { }
         public DbSet<SuperAdmin> SuperAdmins { get; set; }

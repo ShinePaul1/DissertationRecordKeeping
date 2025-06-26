@@ -18,7 +18,7 @@ public class SuperAdminController : ControllerBase
     {
         _superAdminService = superAdminService;
     }
-   // [Authorize(Roles = "superadmin")]
+   // [Authorize(Roles = "admin")]
     [HttpPost("registerAdmin")]
     public async Task<ActionResult<Admin>> RegisterAdmin([FromBody] Admin registerAdmin)
     {
@@ -27,10 +27,8 @@ public class SuperAdminController : ControllerBase
         var admin = await _superAdminService.RegisterAdmin(registerAdmin);
         return CreatedAtAction(nameof(LoginAsAdmin), new { username = admin.Username, school = admin.School }, admin);
     }
-
-    //[Authorize(Roles = "superadmin")]
     [HttpPost("login")]
-    public async Task<IActionResult> LoginAsAdmin([FromBody] Login loginModel)
+    public async Task<IActionResult> LoginAsAdmin([FromBody] LoginModel loginModel)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -38,6 +36,7 @@ public class SuperAdminController : ControllerBase
         var token = await _superAdminService.Login(loginModel);
         return Ok(new { Token = token, username = loginModel.UserName, school = loginModel.School, status = 2 });
     }
+    
     [HttpGet("getadmin/{id}")]
     public async Task<ActionResult<Admin>> GetAdmin(int id)
     {
@@ -48,11 +47,11 @@ public class SuperAdminController : ControllerBase
         return Ok(admin);
     }
 
-    //[Authorize(Roles = "superadmin")]
-    [HttpGet("getalladmin")]
+    [Authorize(Roles = "admin")]
+    [HttpGet("getalladmins")]
     public async Task<ActionResult<List<Admin>>> GetAllAdmin()
     {
-        var admins = await _superAdminService.GetAllAdmin();
+        var admins = await _superAdminService.GetAllAdmins();
         return Ok(admins);
     }
 

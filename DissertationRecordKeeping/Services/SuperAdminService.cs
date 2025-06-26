@@ -31,9 +31,9 @@ public class SuperAdminService : ISuperAdminService
     {
         try
         {
-            _logger.LogInformation("Registering Admin {Username and School}", registerModel.Username, registerModel.School, registerModel.Email);
+            _logger.LogInformation("Registering Admin {Username and School}", registerModel.School);
 
-            if (await _context.Admins.AnyAsync(u => u.Username == registerModel.Username))
+            if (await _context.Admins.AnyAsync(u => u.School == registerModel.School))
                 throw new ValidationException("Username already exists");
 
             if (await _context.Admins.AnyAsync(u => u.Email == registerModel.Email))
@@ -55,37 +55,43 @@ public class SuperAdminService : ISuperAdminService
             _context.Admins.Add(admin);
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("Admin {Username and School} registered successfully", admin.Username, admin.School);
+            _logger.LogInformation("Admin {Username and School} registered successfully", admin.School);
             return admin;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error registering admin {Username and School}", registerModel.Username, registerModel.School);
+            _logger.LogError(ex, "Error registering admin {Username and School}", registerModel.School);
             throw;
         }
     }
-    public async Task<string> Login(Login loginModel)
+    public async Task<string> Login(LoginModel loginModel)
     {
         try
         {
-            _logger.LogInformation("Login attempt for {Username and School}", loginModel.UserName, loginModel.School);
+            _logger.LogInformation("Login attempt for {Username and School}", loginModel.School);
 
             var admin = await _context.Admins
-                .FirstOrDefaultAsync(u => u.Username == loginModel.UserName);
+                .FirstOrDefaultAsync(u => u.School == loginModel.School);
 
             if (admin == null || !VerifyPassword(loginModel.Password, admin.Password))
                 throw new UnauthorizedAccessException("Invalid credentials");
-
+          /*  if (admin == null || !VerifyPassword(loginModel.School, admin.School))
+                throw new UnauthorizedAccessException("Invalid credentials");
+          */
             var token = GenerateJwtToken(admin);
-
-            _logger.LogInformation("User {Username and School} logged in successfully", admin.Username, admin.School);
+            _logger.LogInformation("User {School} logged in successfully", admin.School);
             return token;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during login for {Username and School}", loginModel.UserName, loginModel.School);
+            _logger.LogError(ex, "Error during login for {School}", loginModel.School);
             throw;
         }
+    }
+
+    private bool VerifyPassword(object school1, string school2)
+    {
+        throw new NotImplementedException();
     }
 
     private string HashPassword(string password)
@@ -203,19 +209,8 @@ public class SuperAdminService : ISuperAdminService
         }
     }
 
-    public Task<List<Admin>> GetAllAdmin()
+    Task<List<Admin>> ISuperAdminService.GetAllAdmin()
     {
         throw new NotImplementedException();
     }
-
-    public Task LoginAsAdmin(object login)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task LoginAsAdmin(Login loginModel)
-    {
-        throw new NotImplementedException();
-    }
-
 }
